@@ -1,11 +1,19 @@
 
 from Vector3 import Vector3
+from structures import Color, Light, Material
 from Sphere import Sphere
 import numpy as np
-
+import tqdm
 from PIL import Image
-resolution = [3960, 2160]
 
+resolution = [1000, 500]
+
+
+m = Material(Color(0.5, 0.5, 0.5), Color(0.5, 0.5, 0.5), Color(0.5, 0.5, 0.5), 0.5)
+
+objects = [Sphere(Vector3(0, 0, 5), 1, m)]
+lights = [Light(Vector3(0, 8, 0), Color(1, 0, 0), Color(0, 1, 0))]
+ambient_intensity = Color(0, 0, 1)
 
 x2 = Vector3(1, resolution[1]/resolution[0], 0)
 x1 = Vector3(-1, resolution[1]/resolution[0], 0)
@@ -17,12 +25,11 @@ c = Vector3(0, 0, -1)
 width = x2[0] - x1[0]
 height = x2[1] - x3[1]
 
-objects = [Sphere(Vector3(0, 0, 5), 1, Vector3(1, 1, 1))]
 
 
 def render():
     image = []
-    for y in range(0, resolution[1]):
+    for y in tqdm.tqdm(range(0, resolution[1])):
         image.append([])
         beta = y/resolution[1]
         for x in range(0, resolution[0]):
