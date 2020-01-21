@@ -12,6 +12,12 @@ class Vector3():
         self.product = self.values[0]+self.values[1]+self.values[2]
         self.length = sqrt((self.values[0]**2) + (self.values[1]**2) + (self.values[2]**2))
 
+        
+    
+    def normalized(self):
+        scale_factor = 1.0/self.length
+        return scale_factor*self
+
     def __add__(self, other):
         
         r = []
