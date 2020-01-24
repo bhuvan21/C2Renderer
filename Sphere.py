@@ -1,9 +1,9 @@
 from utils import solve_quadratic
 
 class Sphere():
-    def __init__(self, position, radius, color):
+    def __init__(self, position, radius, material):
         self.position = position
-        self.color = color
+        self.material = material
         self.radius = radius
         self.diameter = radius*2
 
