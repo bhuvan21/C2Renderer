@@ -56,4 +56,6 @@ class Vector3():
 
             return Vector3(full=[other*y for y in self.values])
     
+    def __pow__(self, other):
+        return Vector3(full=[other**y for y in self.values])
     
