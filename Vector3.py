@@ -10,7 +10,9 @@ class Vector3():
             self.values = full
 
         self.product = self.values[0]+self.values[1]+self.values[2]
+
         self.length = sqrt((self.values[0]**2) + (self.values[1]**2) + (self.values[2]**2))
+
 
         
     
