@@ -9,11 +9,11 @@ from PIL import Image
 resolution = [1000, 500]
 
 
-m = Material(Color(0.5, 0.1, 0.1), Color(0.5, 0.1, 0.1), Color(0.5, 0.1, 0.1), 0.2)
+m = Material(Color(0.6, 0.1, 0.1), Color(0.6, 0.1, 0.1), Color(0.3, 0.3, 0.3), 2)
 
 objects = [Sphere(Vector3(0, 0, 5), 1, m)]
-lights = [Light(Vector3(-2, 2, 3), Color(.8, .8, .8), Color(.8, .8, .8))]
-ambient_intensity = Color(0.2, 0.2, 0.2)
+lights = [Light(Vector3(3, 3, 0), Color(.8, .8, .8), Color(.8, .8, .8))]
+ambient_intensity = Color(0.3, 0.3, 0.3 )
 
 x2 = Vector3(1, resolution[1]/resolution[0], 0)
 x1 = Vector3(-1, resolution[1]/resolution[0], 0)
@@ -68,19 +68,24 @@ def render():
                 ambient_component = ambient_intensity*hit.material.ambient_constant
                 final = ambient_component
                 for light in lights:
+                    l2 = (light.position - p)
                     light_vector = (light.position - p).normalized()
                     if (light_vector * normal).product < 0:
 
                         continue
                     else:
                         diffuse_component = (light_vector * normal).product*hit.material.diffuse_constant*light.diffuse_intensity
-                        reflectance = (2.0*normal*light_vector*normal)-light_vector
+                        intensity = (normal*light_vector).product
+                        reflectance = 2.0*intensity*normal-light_vector
                         
-                        view = (p - origin).normalized()
-                        specular_component = light.specular_intensity*hit.material.specular_constant*((reflectance*view)**hit.material.shininess)
-                        final = diffuse_component + final
-                print(reflectance.values, view.values, specular_component.values, diffuse_component.values, final.values)
-                image[-1].append((final*255.0).values)
+                        view = origin - p
+                        specular_component = light.specular_intensity*((view*reflectance).product)**hit.material.shininess
+                        
+                        final = specular_component +diffuse_component+ final
+                #print(reflectance.values, view.values, specular_component.values, diffuse_component.values, final.values)
+                final = (final*255.0).values
+                final = [max(0, min(x, 255)) for x in final]
+                image[-1].append(final)
 
             else:
                 image[-1].append((0, 0, 0))
