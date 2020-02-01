@@ -9,7 +9,7 @@ from PIL import Image
 resolution = [1000, 500]
 
 
-m = Material(Color(0.6, 0.1, 0.1), Color(0.6, 0.1, 0.1), Color(0.6, 0.1, 0.1), 5)
+m = Material(Color(0.6, 0.1, 0.1), Color(0.6, 0.1, 0.1), Color(0.3, 0.3, 0.3), 50)
 
 objects = [Sphere(Vector3(0, 0, 5), 1, m)]
 lights = [Light(Vector3(3, 3, 0), Color(.8, .8, .8), Color(.8, .8, .8))]
@@ -76,12 +76,14 @@ def render():
                     else:
                         diffuse_component = (light_vector * normal).product*hit.material.diffuse_constant*light.diffuse_intensity
                         intensity = (normal*light_vector).product
-                        reflectance = intensity*normal-light_vector
+                        reflectance = 2*normal*(normal*light_vector).product - light_vector
                         
-                        view = origin - p
-                        specular_component = light.specular_intensity*(max(0, (view*reflectance).product))**hit.material.shininess
-
-                        final = specular_component +diffuse_component+ final
+                        view = (origin - p).normalized()
+                        if (view*reflectance).product > 1:
+                            print(view.values, reflectance.values, (view*reflectance).product)
+                        specular_component = hit.material.specular_constant*light.specular_intensity*(max(0, (view*reflectance).product))**hit.material.shininess
+                        
+                        final = diffuse_component + specular_component + final
                 #print(reflectance.values, view.values, specular_component.values, diffuse_component.values, final.values)
                 final = (final*255.0).values
                 
