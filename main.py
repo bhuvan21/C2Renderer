@@ -2,6 +2,7 @@
 from Vector3 import Vector3
 from structures import Color, Light, Material
 from Sphere import Sphere
+from Triangle import Triangle
 import numpy as np
 import tqdm
 from PIL import Image
@@ -10,9 +11,11 @@ resolution = [1000, 500]
 
 
 m = Material(Color(0.6, 0.1, 0.1), Color(0.6, 0.1, 0.1), Color(0.3, 0.3, 0.3), 50)
+m2 = Material(Color(0.1, 0.1, 0.6), Color(0.1, 0.1, 0.6), Color(0.3, 0.3, 0.3), 10)
 
-objects = [Sphere(Vector3(0, 0, 5), 1, m)]
-lights = [Light(Vector3(3, 3, 0), Color(.8, .8, .8), Color(.8, .8, .8))]
+#objects = [Sphere(Vector3(4, 0, 8), 1, m), Sphere(Vector3(-4, 0, 8), 1, m2)]
+objects = [Triangle(Vector3(-1, -1, 7), Vector3(0, 1, 7), Vector3(1, -1, 7), m2)]
+lights = [Light(Vector3(-6, 3, 0), Color(.8, .8, .8), Color(.8, .8, .8))]
 ambient_intensity = Color(0.3, 0.3, 0.3 )
 
 x2 = Vector3(1, resolution[1]/resolution[0], 0)
@@ -63,8 +66,14 @@ def render():
                 t = smallest
                 hit = ts[i][1]
                 p = origin + t*direction
-                normal = (p - hit.position).normalized()
-                
+                if type(ts[i][1]) == Sphere:
+                    normal = (p - hit.position).normalized()
+                elif type(ts[i][1]) == Triangle:
+                    tri = ts[i][1]
+                    normal = ((tri.V2 - tri.V1).cross((tri.V3-tri.V1))).normalized()
+                    image[-1].append((255, 255, 255)) 
+                    continue                
+
                 ambient_component = ambient_intensity*hit.material.ambient_constant
                 final = ambient_component
                 for light in lights:

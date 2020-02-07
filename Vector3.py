@@ -10,15 +10,20 @@ class Vector3():
             self.values = full
 
         self.product = self.values[0]+self.values[1]+self.values[2]
+        
 
         self.length = sqrt((self.values[0]**2) + (self.values[1]**2) + (self.values[2]**2))
 
-
-        
     
     def normalized(self):
         scale_factor = 1.0/self.length
         return scale_factor*self
+    
+    def cross(self, other):
+        cx = (self.values[1]*other.values[2]) - (self.values[2]*other.values[1])
+        cy = (self.values[2]*other.values[0]) - (self.values[0]*other.values[2])
+        cz = (self.values[0]*other.values[1]) - (self.values[1]*other.values[0])
+        return Vector3(cx, cy, cz)
 
     def __add__(self, other):
         
