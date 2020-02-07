@@ -14,8 +14,11 @@ class Triangle():
         t = (d-(plane_normal*ray_origin).product)/(plane_normal*ray_direction).product
         Q = ray_origin + (t*ray_direction)
 
+        edge1_test = (((self.V2-self.V1).cross(Q-self.V1))*plane_normal).product >= 0
+        edge2_test = (((self.V3-self.V2).cross(Q-self.V2))*plane_normal).product >= 0
+        edge3_test = (((self.V1-self.V3).cross(Q-self.V3))*plane_normal).product >= 0
 
-        if (((self.V2-self.V1).cross(Q-self.V1))*plane_normal).product >= 0:
-            print(d, t, (plane_normal*((self.V2 - self.V1).cross(Q-self.V1))).product, Q.values)
+        if edge1_test and edge2_test and edge3_test:
+
             return [t]
         return []
