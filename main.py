@@ -6,6 +6,7 @@ from Triangle import Triangle
 import numpy as np
 import tqdm
 from PIL import Image
+import math
 
 resolution = [1000, 500]
 
@@ -13,9 +14,29 @@ resolution = [1000, 500]
 m = Material(Color(0.6, 0.1, 0.1), Color(0.6, 0.1, 0.1), Color(0.3, 0.3, 0.3), 50)
 m2 = Material(Color(0.1, 0.1, 0.6), Color(0.1, 0.1, 0.6), Color(0.3, 0.3, 0.3), 50)
 
+with open("20mm_cube.stl", "r") as f:
+    lines = f.readlines()
+vs = [x for x in lines if "vertex" in x]
+theta = 2*math.pi/8
+points = []
+for v in vs:
+    parts = v.split(" ")
+    newv = Vector3((float(parts[1])/5)-2, (float(parts[2])/5)+2, (float(parts[3])/5)+5)
+    newnewv = Vector3((newv[0]*math.cos(theta) + newv[2]*math.sin(theta)), newv[1],((-newv[0]*math.sin(theta))+(newv[2]*math.cos(theta))))
+    newnewnewv = Vector3(newnewv[0]-5, newnewv[1], newnewv[2]+4)
+    points.append(newnewnewv)
+print(points[0].values)
+tris = []
+for p in range(0, len(points), 3):
+    print(p)
+    tris.append(Triangle(points[p], points[p+1], points[p+2], m2))
+
+
+
+
 #objects = [Sphere(Vector3(4, 0, 8), 1, m), Sphere(Vector3(-4, 0, 8), 1, m2)]
-objects = [Triangle(Vector3(-2, -2, 7), Vector3(1, -2, 7), Vector3(1, -1, 7), m2)]
-lights = [Light(Vector3(0, 2, 0), Color(.8, .8, .8), Color(.8, .8, .8))]
+objects = tris
+lights = [Light(Vector3(0, -5, 0), Color(.7, .7, .7), Color(.7, .7, .7))]
 ambient_intensity = Color(0.3, 0.3, 0.3 )
 
 x2 = Vector3(1, resolution[1]/resolution[0], 0)

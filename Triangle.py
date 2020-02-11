@@ -10,7 +10,9 @@ class Triangle():
     def intersect(self, ray_direction, ray_origin):
         plane_normal = ((self.V2 - self.V1).cross((self.V3-self.V1))).normalized()
         d = (plane_normal*self.V1).product
-
+        
+        if (plane_normal*ray_direction).product == 0:
+            return []
         t = (d-(plane_normal*ray_origin).product)/(plane_normal*ray_direction).product
         Q = ray_origin + (t*ray_direction)
 
