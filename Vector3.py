@@ -42,7 +42,7 @@ class Vector3():
         return self.values[key]
 
     def __iter__(self):
-        return self.values
+        return iter(self.values)
 
     def __mul__(self, other):
         if type(other) == Vector3:
