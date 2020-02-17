@@ -1,12 +1,36 @@
 '''Triangle Class. Contains triangle definition as well as triangle intersection test'''
+from utils import is_clockwise
 
 class Triangle():
-    def __init__(self, V1, V2, V3, material):
-        self.V1 = V1
-        self.V2 = V2
-        self.V3 = V3
-        self.vertices = [V1, V2, V3]
+    def __init__(self, V1, V2, V3, material, normal=None):
+        points = [V1, V2, V3]
+
+        average = (points[0]+points[1]+points[2])*(1/3)
+        
+        n = (points[1] - points[0]).cross((points[2] - points[0]))
+        newps = []
+        if is_clockwise(points[0], points[1], average, n):
+            newps += [points[1], points[0]]
+        else:
+            newps += [points[0], points[1]]
+
+        if is_clockwise(points[1], points[2], average, n):
+            newps.append(points[2])
+        elif is_clockwise(points[2], points[0], average, n):
+            newps.insert(1, points[2])
+        else:
+            newps = [points[2]]+ newps
+
+        self.vertices = newps
+        self.V1 = newps[0]
+        self.V2 = newps[1]
+        self.V3 = newps[2]
+
         self.material = material
+        if normal is not None:
+            self.normal = normal
+        else:
+            self.normal = ((self.V2 - self.V1).cross((self.V3-self.V1))).normalized()
     
     def intersect(self, ray_direction, ray_origin):
         plane_normal = ((self.V2 - self.V1).cross((self.V3-self.V1))).normalized()

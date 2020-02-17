@@ -26,8 +26,9 @@ m2 = Material(Color(0.1, 0.1, 0.6), Color(0.1, 0.1, 0.6), Color(0.3, 0.3, 0.3), 
 m3 = Material(Color(0.1, 0.1,0.1), Color(0.1,0.1,0.1), Color(0.2, 0.2, 0.2), 2, Color(0.7, 0.7, 0.7))
 
 objects = []
-#objects = [Sphere(Vector3(4, 0, 8), 3, m3), Sphere(Vector3(-4, 0, 8), 1, m2)]
-objects = [Triangle(Vector3(-7, 7, 10), Vector3(7, -7, 10), Vector3(-7, -7, 10), m3), Triangle(Vector3(-7, 7, 10), Vector3(7, 7, 10), Vector3(7, -7, 10), m3), Sphere(Vector3(-3, 0, 5), 1, m2)]
+
+objects = [Triangle(Vector3(-7, 7, 10), Vector3(7, -7, 10), Vector3(-7, -7, 10), m3), Triangle(Vector3(-7, 7, 10), Vector3(7, 7, 10), Vector3(7, -7, 10), m3)]
+objects += STL(filename="20mm_cube.stl", rotation=Vector3(0, 0, 0), translation=Vector3(-4, 2, 4), scale_factor=Vector3(0.1, 0.1, 0.1), material=m, camera=c, culling=False).tris
 
 lights = [Light(Vector3(0, 0, 7), Color(.7, .7, .7), Color(.7, .7, .7))]
 ambient_intensity = Color(0.6, 0.6, 0.6 )
@@ -63,8 +64,8 @@ def reflect(ray_direction, origin, depth, prev_hit=None):
                 normal = (p - hit.position).normalized()
             elif type(ts[i][1]) == Triangle:
                 tri = ts[i][1]
-                normal = ((tri.V2 - tri.V1).cross((tri.V3-tri.V1))).normalized()
-            
+                #normal = ((tri.V2 - tri.V1).cross((tri.V3-tri.V1))).normalized()
+                normal = tri.normal
             
 
 
