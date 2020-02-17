@@ -1,6 +1,7 @@
+'''STL Class. Contains triangle culling algorithm, as well as STL intersection test (simply many triangle intersection tests)'''
 from Vector3 import Vector3
 import math
-from utils import rotate, rotate_vertexes, translate, translate_vertexes, scale, scale_vertexes, is_clockwise
+from utils import rotate_vertexes, translate_vertexes, scale_vertexes, is_clockwise
 from Triangle import Triangle
 
 class STL():
@@ -8,11 +9,11 @@ class STL():
         self.filename = filename
         self.vertices = []
         self.material = material
+        
+        # read in stl file and parse it for raw vertex data
         with open(filename, "r") as f:
             lines = f.readlines()
-
         string_vertexes = [x for x in lines if "vertex" in x]
-        
         points = []
         for v in string_vertexes:
             parts = v.split(" ")
@@ -23,12 +24,15 @@ class STL():
 
             points.append(newv)
 
+        # apply given transformations to all vertices of the STL
         points = scale_vertexes(points, scale_factor)
         points = rotate_vertexes(points, rotation)
         points = translate_vertexes(points, translation)
 
-        tris = []
 
+        # simple back face triangle culling
+        tris = []
+        # organise all triangles into same circular point order
         for p in range(0, len(points), 3):
             average = (points[p]+points[p+1]+points[p+2])*(1/3)
             
@@ -48,18 +52,24 @@ class STL():
                 newps = [ps[2]]+ newps
             tris.append(Triangle(newps[0], newps[1], newps[2], material))
 
+        # cull the triangles facing backwards
         newtris = []
+        badtris = 0
         for i, tri in enumerate(tris):
             view = (tri.V1+tri.V2+tri.V3)*(1/3) - camera
             n = (tri.V2 - tri.V1).cross((tri.V3-tri.V1))
-
-            if not 180-math.acos((view*n).product/view.length/n.length)*180/math.pi > 90:
-                newtris.append(tri)
-
+            try:
+                #print(tri.V1.values, tri.V2.values, tri.V3.values, view.values, n.values)
+                if not 180-math.acos((view*n).product/view.length/n.length)*180/math.pi > 90:
+                    newtris.append(tri)
+            except ZeroDivisionError:
+                badtris+=1
+        print("{} bad triangles".format(badtris))
         print("culled from {} to {}".format(len(tris), len(newtris)))
         self.tris = newtris
         self.vertices = points
     
+    # conducts triangle intersection tests for every sub triangle
     def intersect(self, ray_direction, ray_origin):
         ts = []
         for t in self.tris:

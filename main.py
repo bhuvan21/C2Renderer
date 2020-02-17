@@ -21,19 +21,22 @@ c = Vector3(0, 0, -1)
 width = x2[0] - x1[0]
 height = x2[1] - x3[1]
 
-m = Material(Color(0.6, 0.1, 0.1), Color(0.6, 0.1, 0.1), Color(0.3, 0.3, 0.3), 50)
+m = Material(Color(0.6, 0.1, 0.1), Color(0.6, 0.1, 0.1), Color(0.3, 0.3, 0.3), 2)
 m2 = Material(Color(0.1, 0.1, 0.6), Color(0.1, 0.1, 0.6), Color(0.3, 0.3, 0.3), 2)
 
 objects = []
-objects = add_STL(objects, STL(filename="20mm_cube.stl", camera=c, material=m2, scale_factor=(0.15, 0.15, 0.15), rotation=(15, 45, 0), translation=(-0.5, 3, 8)))
+#objects = add_STL(objects, STL(filename="kobold.stl", camera=c, material=m2, scale_factor=(0.75, 0.75, 0.75), rotation=(10, 10, 10), translation=(-29, -12, 8)))
+objects = add_STL(objects, STL(filename="panther.stl", camera=c, material=m, rotation=(270, 250, 0) , translation=(15, -15, 55)))
 
-lights = [Light(Vector3(6, -1, 3), Color(.7, .7, .7), Color(.7, .7, .7))]
+lights = [Light(Vector3(-10, 0, 0), Color(.7, .7, .7), Color(.7, .7, .7)), ]
 ambient_intensity = Color(0.3, 0.3, 0.3 )
 
 image = np.zeros(shape=(resolution[1], resolution[0], 3))
 
 
 def single_ray(x, y, beta):
+    if x == 0:
+        print(y)
     alpha = x/resolution[0]
 
     t1 = ((1-alpha)*x1)

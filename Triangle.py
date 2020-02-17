@@ -1,3 +1,4 @@
+'''Triangle Class. Contains triangle definition as well as triangle intersection test'''
 
 class Triangle():
     def __init__(self, V1, V2, V3, material):

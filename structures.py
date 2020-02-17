@@ -1,3 +1,4 @@
+'''Contains data structures for materials and lights'''
 from Vector3 import Vector3
 
 Color = Vector3
