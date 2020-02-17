@@ -25,13 +25,15 @@ m = Material(Color(0.6, 0.1, 0.1), Color(0.6, 0.1, 0.1), Color(0.3, 0.3, 0.3), 2
 m2 = Material(Color(0.1, 0.1, 0.6), Color(0.1, 0.1, 0.6), Color(0.3, 0.3, 0.3), 2)
 
 objects = []
-#objects = add_STL(objects, STL(filename="kobold.stl", camera=c, material=m2, scale_factor=(0.75, 0.75, 0.75), rotation=(10, 10, 10), translation=(-29, -12, 8)))
-objects = add_STL(objects, STL(filename="panther.stl", camera=c, material=m, rotation=(270, 250, 0) , translation=(15, -15, 55)))
+objects = [Sphere(Vector3(1, 1, 8), .75, m), Sphere(Vector3(-4, -1, 8), 1.75, m2)]
 
-lights = [Light(Vector3(-10, 0, 0), Color(.7, .7, .7), Color(.7, .7, .7)), ]
+lights = [Light(Vector3(6, 3, 8), Color(.7, .7, .7), Color(.7, .7, .7)), ]
 ambient_intensity = Color(0.3, 0.3, 0.3 )
 
 image = np.zeros(shape=(resolution[1], resolution[0], 3))
+
+
+
 
 
 def single_ray(x, y, beta):
@@ -65,6 +67,11 @@ def single_ray(x, y, beta):
         t = smallest
         hit = ts[i][1]
         p = origin + t*direction
+
+
+                    
+
+
         if type(ts[i][1]) == Sphere:
             normal = (p - hit.position).normalized()
         elif type(ts[i][1]) == Triangle:
@@ -75,16 +82,25 @@ def single_ray(x, y, beta):
         ambient_component = ambient_intensity*hit.material.ambient_constant
         final = ambient_component
         for light in lights:
-            light_vector = (light.position - p).normalized()
-            if (light_vector * normal).product < 0:
+            shadow = False
+            for obj in objects:
+                if obj != hit:
+                    intersect = obj.intersect(light.position-p, p)
+                    for inter in intersect:
+                        if 0 < inter < 1:
+                            shadow = True
 
-                continue
-            else:
-                diffuse_component = (light_vector * normal).product*hit.material.diffuse_constant*light.diffuse_intensity
-                reflectance = 2*normal*(normal*light_vector).product - light_vector
-                view = (origin - p).normalized()
-                specular_component = hit.material.specular_constant*light.specular_intensity*(max(0, (view*reflectance).product))**hit.material.shininess
-                final = diffuse_component + specular_component + final
+            if not shadow:
+                light_vector = (light.position - p).normalized()
+                if (light_vector * normal).product < 0:
+
+                    continue
+                else:
+                    diffuse_component = (light_vector * normal).product*hit.material.diffuse_constant*light.diffuse_intensity
+                    reflectance = 2*normal*(normal*light_vector).product - light_vector
+                    view = (origin - p).normalized()
+                    specular_component = hit.material.specular_constant*light.specular_intensity*(max(0, (view*reflectance).product))**hit.material.shininess
+                    final = diffuse_component + specular_component + final
        
         final = (final*255.0).values    
         final = [max(0, min(x, 255)) for x in final]
