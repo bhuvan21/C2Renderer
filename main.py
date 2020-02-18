@@ -11,7 +11,7 @@ from utils import add_STL
 import time
 from STL import STL
 
-resolution = [1000, 500]
+resolution = [500, 250]
 x2 = Vector3(1, resolution[1]/resolution[0], 0)
 x1 = Vector3(-1, resolution[1]/resolution[0], 0)
 x4 = Vector3(1, -resolution[1]/resolution[0], 0)
@@ -24,13 +24,16 @@ height = x2[1] - x3[1]
 m = Material(Color(0.6, 0.1, 0.1), Color(0.6, 0.1, 0.1), Color(0.3, 0.3, 0.3), 2, Color(0.3, 0.3, 0.3))
 m2 = Material(Color(0.1, 0.1, 0.6), Color(0.1, 0.1, 0.6), Color(0.3, 0.3, 0.3), 2,  Color(0.3, 0.3, 0.3))
 m3 = Material(Color(0.1, 0.1,0.1), Color(0.1,0.1,0.1), Color(0.2, 0.2, 0.2), 2, Color(0.7, 0.7, 0.7))
+m4 = Material(Color(0.6, 0.1, 0.1), Color(0.6, 0.1, 0.1), Color(0.3, 0.3, 0.3), 2, Color(0.3, 0.3, 0.3), True, 1.5)
 
-objects = []
+objects = [Triangle(Vector3(-100, -3, 100), Vector3(100, -3, 100), Vector3(0, -3, -100), m)]
+objects.append(Sphere(Vector3(0, -1, 12), 2, m4))
 
-objects = [Triangle(Vector3(-7, 7, 10), Vector3(7, -7, 10), Vector3(-7, -7, 10), m3), Triangle(Vector3(-7, 7, 10), Vector3(7, 7, 10), Vector3(7, -7, 10), m3)]
-objects += STL(filename="20mm_cube.stl", rotation=Vector3(0, 0, 0), translation=Vector3(-4, 2, 4), scale_factor=Vector3(0.1, 0.1, 0.1), material=m, camera=c, culling=False).tris
+#Sphere(Vector3(0, -1.5, 12), 2, m4)
+#objects = [Triangle(Vector3(-7, 7, 10), Vector3(7, -7, 10), Vector3(-7, -7, 10), m3), Triangle(Vector3(-7, 7, 10), Vector3(7, 7, 10), Vector3(7, -7, 10), m3)]
+#objects += STL(filename="20mm_cube.stl", rotation=Vector3(0, 0, 0), translation=Vector3(0, 0, 4), scale_factor=Vector3(0.1, 0.1, 0.1), material=m4, camera=c, culling=False).tris
 
-lights = [Light(Vector3(0, 0, 7), Color(.7, .7, .7), Color(.7, .7, .7))]
+lights = [Light(Vector3(-4, 6, 4), Color(.7, .7, .7), Color(.7, .7, .7))]
 ambient_intensity = Color(0.6, 0.6, 0.6 )
 
 image = np.zeros(shape=(resolution[1], resolution[0], 3))
@@ -38,7 +41,7 @@ image = np.zeros(shape=(resolution[1], resolution[0], 3))
 
 def reflect(ray_direction, origin, depth, prev_hit=None):
     depth = depth - 1
-    if depth != 0:
+    if depth >= 0:
         
         ts = []
         for obj in objects:
@@ -67,53 +70,126 @@ def reflect(ray_direction, origin, depth, prev_hit=None):
                 #normal = ((tri.V2 - tri.V1).cross((tri.V3-tri.V1))).normalized()
                 normal = tri.normal
             
+            if prev_hit == None:
+                passby = False
+            else:
+                passby = prev_hit.material.refracts
+            
+            if (hit.material.refracts):
+                '''
+                if depth % 1 != 1:
+                    print(str(p.values) + " " + str(normal.values))
+                '''
+                '''
+                if (normal*p).product < 0:
+                    eita_one = hit.material.refractive_index
+                    eita_two = 1
+                else:
+                    eita_one = 1
+                    eita_two = prev_hit.material.refractive_index
+                eita = eita_one/eita_two
 
+                theta_one = math.acos(((normal*p).product)/normal.length/p.length)
 
+                c_one = math.cos(theta_one)
+                to_root = 1-((eita**2)*(1-(math.cos(theta_one))**2))
+                if to_root > 0:
+                    c_two = math.sqrt(to_root)
+                
+                    T = (eita*p) + normal*((eita*c_one)-c_two)
+                    print("I: " + str(p.values) + "\nT: " + str(T.values) + "\nDepth: " + str(depth), "\nTHETA1 :" + theta_one + "\nTheta2: " + math.acos(T[0]/T[2])
+                    return reflect(T, p, depth+0.5, prev_hit=hit)
 
+                    
+                else:
+                    #TIR
+                    reflectance = ray_direction - 2*normal*(normal*ray_direction).product
+                    return reflect(reflectance, p, depth+0.5, prev_hit=hit)
+                '''
+                cosi = max(-1, min(1, (p.normalized()*normal.normalized()).product))
+                print(cosi)
+                etai = 1
+                etat = hit.material.refractive_index
+                if cosi < 0:
+                    cosi = -cosi
+                    
+                else:
+                    
+                    etai, etat = etat, etai
+                    #print(" REVERSING GUYS" + str(etai/etat))
+                    normal = -1*normal
+                eta = etai/etat
+                k = 1 - eta * eta * (1 - cosi * cosi)
+                if k < 0:
+                    return Color(0, 0, 0)
+                else:
+                    sint = etai/etat * math.sqrt(max(0, 1-cosi*cosi))
+                    cost = math.sqrt(max(0, 1-sint*sint))
+                    rs = ((etat*cosi)-(etai*cost)) / ((etat*cosi) + (etai *cost))
+                    rp = ((etai*cosi)-(etat*cost)) / ((etai*cosi) + (etat *cost))
+                    kr = (rs*rs+rp*rp)/2
+                    kt = 1-kr
+                    reflectance = ray_direction - 2*normal*(normal*ray_direction).product
+                    theta_one = math.acos(((normal*p).product)/normal.length/p.length)
 
-            ambient_component = ambient_intensity*hit.material.ambient_constant
-            final = ambient_component
-            for light in lights:
-                shadow = False
-                for obj in objects:
-                    if obj != hit:
-                        intersect = obj.intersect(light.position-p, p)
-                        for inter in intersect:
-                            if 0 < inter < 1:
-                                shadow = True
-
-                if not shadow:
-                    light_vector = (light.position - p).normalized()
-                    if (light_vector * normal).product < 0:
-
-                        continue
+                   
+                    if 1-((etai**2)*(1-(math.cos(theta_one))**2)) > 0:
+                        return (kt*reflect(eta * p.normalized() + (eta *cosi - math.sqrt(k)) * normal, hit.position, depth+0.5, prev_hit=hit)) + (kr*reflect(reflectance, p, depth+0.5, prev_hit=hit))
                     else:
-                        diffuse_component = (light_vector * normal).product*hit.material.diffuse_constant*light.diffuse_intensity
-                        reflectance = 2*normal*(normal*light_vector).product - light_vector
-                        view = (origin - p).normalized()
-                        specular_component = hit.material.specular_constant*light.specular_intensity*(max(0, (view*reflectance).product))**hit.material.shininess
-                        final = diffuse_component + specular_component + final
-                elif prev_hit == None:
-                    return final
-            
-           
-            
-            reflectance = ray_direction - 2*normal*(normal*ray_direction).product
-            try:
+                        return(reflect(reflectance, p, depth+0.5, prev_hit=hit))
+                
+                
+                
 
-                final = Color(full=[max(0, min(x, 1)) for x in final])
+
+
+
+            if True:
+
+
+                ambient_component = ambient_intensity*hit.material.ambient_constant
+                final = ambient_component
+                for light in lights:
+                    shadow = False
+                    for obj in objects:
+                        if obj != hit:
+                            intersect = obj.intersect(light.position-p, p)
+                            for inter in intersect:
+                                if 0 < inter < 1:
+                                    shadow = True
+
+                    if not shadow:
+                        light_vector = (light.position - p).normalized()
+                        if (light_vector * normal).product < 0:
+
+                            continue
+                        else:
+                            diffuse_component = (light_vector * normal).product*hit.material.diffuse_constant*light.diffuse_intensity
+                            reflectance = 2*normal*(normal*light_vector).product - light_vector
+                            view = (origin - p).normalized()
+                            specular_component = hit.material.specular_constant*light.specular_intensity*(max(0, (view*reflectance).product))**hit.material.shininess
+                            final = diffuse_component + specular_component + final
+                    elif prev_hit == None:
+                        return final
                 
-            except Exception as e:
-                print("UNEPIC OK TRHIS IS BAD")
-                raise e
-            if p[2] > 100:
-                print("WAT THE ACTUAL FRICK")
-                print(str(p.values)+str(hit))
-            if depth == 1 and prev_hit == objects[1]:
+            
                 
-                
-                print("TS: " + str(ts) + "\nRay Direction: " + str(ray_direction.values) +"\nOrigin: " +str(origin.values)+ "\nV :" + "\nNormal: " + str(normal.values)+"\nReflect: " + str(reflectance.values)+"\nHit: " +str(p.values)+ " " + str(depth) + " uh")
-            return final + (reflect(reflectance, p, depth, prev_hit=hit)*hit.material.reflectivity_constant)
+                reflectance = ray_direction - 2*normal*(normal*ray_direction).product
+                try:
+
+                    final = Color(full=[max(0, min(x, 1)) for x in final])
+                    
+                except Exception as e:
+                    print("UNEPIC OK TRHIS IS BAD")
+                    raise e
+                if p[2] > 100:
+                    print("WAT THE ACTUAL FRICK")
+                    print(str(p.values)+str(hit))
+                if depth == 1 and prev_hit == objects[1]:
+                    
+                    
+                    print("TS: " + str(ts) + "\nRay Direction: " + str(ray_direction.values) +"\nOrigin: " +str(origin.values)+ "\nV :" + "\nNormal: " + str(normal.values)+"\nReflect: " + str(reflectance.values)+"\nHit: " +str(p.values)+ " " + str(depth) + " uh")
+                return final + (reflect(reflectance, p, depth, prev_hit=hit)*hit.material.reflectivity_constant)
 
             
 

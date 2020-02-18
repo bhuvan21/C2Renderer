@@ -10,9 +10,11 @@ class Light():
         self.specular_intensity = specular_intensity
 
 class Material():
-    def __init__(self, ambient_c, diffuse_c, specular_c, shininess, reflectivity_c):
+    def __init__(self, ambient_c, diffuse_c, specular_c, shininess, reflectivity_c, refracts=False, refractive_index=1):
         self.ambient_constant = ambient_c
         self.diffuse_constant = diffuse_c
         self.specular_constant = specular_c
         self.shininess = shininess
         self.reflectivity_constant = reflectivity_c
+        self.refracts = refracts
+        self.refractive_index = refractive_index
