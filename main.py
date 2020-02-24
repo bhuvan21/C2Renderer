@@ -83,8 +83,9 @@ def reflect(ray_direction, origin, objects, lights, ambient_intensity, depth, pr
                 eta = etai/etat
                 k = 1 - eta * eta * (1 - cosi * cosi)
                 if k < 0:
-                    # total internal reflection - not modelled
-                    return Color(0, 0, 0)
+                    # total internal reflection
+                    kr = 1
+                    kt = 0
                 else:
                     
                     sint = etai/etat * math.sqrt(max(0, 1-cosi*cosi))
@@ -94,13 +95,11 @@ def reflect(ray_direction, origin, objects, lights, ambient_intensity, depth, pr
                     rp = ((etai*cosi)-(etat*cost)) / ((etai*cosi) + (etat *cost))
                     kr = (rs*rs+rp*rp)/2
                     kt = 1-kr
-                    reflectance = ray_direction - 2*normal*(normal*ray_direction).product
-                    theta_one = math.acos(((normal*p).product)/normal.length/p.length)
+                reflectance = ray_direction - 2*normal*(normal*ray_direction).product
 
-                   
-                    # return the combination of the refracted and reflected light
-                    # by sending out reflected and refracted rays, adding their contribution to the final pixel color
-                    return (kt*reflect(eta * p.normalized() + (eta *cosi - math.sqrt(k)) * normal, hit.position, objects, lights, ambient_intensity, depth+0.5, prev_hit=hit)) + (kr*reflect(reflectance, p, objects, lights, ambient_intensity, depth+0.5, prev_hit=hit))
+                # return the combination of the refracted and reflected light
+                # by sending out reflected and refracted rays, adding their contribution to the final pixel color
+                return (kt*reflect(eta * p.normalized() + (eta *cosi - math.sqrt(k)) * normal, hit.position, objects, lights, ambient_intensity, depth+0.5, prev_hit=hit)) + (kr*reflect(reflectance, p, objects, lights, ambient_intensity, depth+0.5, prev_hit=hit))
                                   
             else:
                 # reflection math if the object does not refract light
@@ -189,6 +188,7 @@ def single_ray(x, y, x1, x2, x3, x4, c, resolution, objects, lights, ambient_int
 
             pixel = [p + z for p,z in zip(pixel, z)]
     if anti_aliasing:
+
         return [p/9 for p in pixel]
     else:
         return pixel
@@ -230,11 +230,11 @@ def render(c, resolution, objects, lights, ambient_intensity, anti_aliasing=Fals
             i += 1
     Image.fromarray(np.uint8(np.array(image))).save('test.png')
 
-        
-
 if __name__ == '__main__': 
     t= time.time()
-
+    # camera location
+    c = Vector3(0, 0, -1)
+    # CHANGE THINGS AFTER THIS POINT
     # setup code which is used for renders
     # all of this is adjustable depending on what you want to render
     # blue and red test materials, with different shininesses
@@ -245,19 +245,18 @@ if __name__ == '__main__':
     m3 = Material(Color(0.1, 0.1,0.1), Color(0.1,0.1,0.1), Color(0.2, 0.2, 0.2), 2, Color(0.7, 0.7, 0.7))
     # glass material, refracts, index of refraction is 1.5
     m4 = Material(Color(0.6, 0.1, 0.1), Color(0.6, 0.1, 0.1), Color(0.3, 0.3, 0.3), 2, Color(0.3, 0.3, 0.3), True, 1.5)
-    # camera location
-    c = Vector3(0, 0, -1)
+    
 
     # objects in the scene
-    objects = []
-    objects += STL(filename="realcrane.stl", rotation=Vector3(90, 50, 180), translation=Vector3(0, 0, 5), scale_factor=Vector3(.1, .1, .1), material=m, camera=c, culling=True).tris
+    objects = [Sphere(Vector3(0, 0, 8), 3, m)]
+    #objects = [] + STL(filename="dragons.stl", rotation=Vector3(270, 40+180, 0), translation=Vector3(3, -3, 15), scale_factor=Vector3(.1, .1, .1), material=m, camera=c, culling=True).tris
     
     # lighting information for the scene
-    lights = [Light(Vector3(0, 0, 2), Color(.7, .7, .7), Color(.7, .7, .7))]
-    ambient_intensity = Color(0.1, 0.1, 0.1 )
+    lights = [Light(Vector3(5 , 4, 2), Color(.7, .7, .7), Color(.7, .7, .7))]
+    ambient_intensity = Color(0.2, 0.2, 0.2 )
 
     # information about the resultant image
-    resolution = [100, 50]
+    resolution = [500, 500]
     anti_aliasing = False
     
     render(c, resolution, objects, lights, ambient_intensity, anti_aliasing=anti_aliasing)

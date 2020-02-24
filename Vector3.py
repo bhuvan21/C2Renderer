@@ -71,7 +71,7 @@ class Vector3():
 
             return Vector3(full=[other*y for y in self.values])
     
-    # raising Vector3 instances to a power is now defined
+    # raising Vector3 instances to a power is now defined (this way)
     def __pow__(self, other):
         return Vector3(full=[other**y for y in self.values])
     

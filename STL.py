@@ -56,7 +56,7 @@ class STL():
 
         tris = []
         for p in range(0, len(points), 3):
-            print(p)
+            
             ps = [points[p], points[p+1], points[p+2]]
             tris.append(Triangle(ps[0], ps[1], ps[2], material, tri_normals[int(p/3)]))
         
