@@ -1,5 +1,12 @@
 # C2Renderer
-A simple ray tracing renderer written in python. Includes the following features:
+A simple ray tracing renderer written in python.   
+
+
+![Refraction Image](https://github.com/bhuvan21/C2Renderer/blob/master/refrac.png?raw=true)
+
+
+  
+Includes the following features:
 - Light sources
 - Sphere geometry
 - STL geometry

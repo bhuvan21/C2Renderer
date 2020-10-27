@@ -11,6 +11,7 @@ from multiprocessing import Pool
 
 # all my code imports
 from STL import STL
+from OBJ import OBJ
 from utils import add_STL
 from Sphere import Sphere
 from Vector3 import Vector3
@@ -248,9 +249,11 @@ if __name__ == '__main__':
     
 
     # objects in the scene
-    objects = [Sphere(Vector3(0, 0, 8), 3, m)]
+    #objects = [Sphere(Vector3(0, 0, 8), 3, m)]
     #objects = [] + STL(filename="dragons.stl", rotation=Vector3(270, 40+180, 0), translation=Vector3(3, -3, 15), scale_factor=Vector3(.1, .1, .1), material=m, camera=c, culling=True).tris
     
+    objects = [OBJ(filename="cube.obj", translation=(0, 0, 0), material=m, camera=c, culling=False)]
+
     # lighting information for the scene
     lights = [Light(Vector3(5 , 4, 2), Color(.7, .7, .7), Color(.7, .7, .7))]
     ambient_intensity = Color(0.2, 0.2, 0.2 )
